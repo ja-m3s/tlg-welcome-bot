@@ -6,3 +6,4 @@ terraform.tfstate
 terraform.tfstate.backup
 private_key.pem
 public_key.pub
+node_modules
