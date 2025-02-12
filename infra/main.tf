@@ -60,6 +60,36 @@ resource "aws_instance" "discord-welcome-bot" {
   }
 }
 
+resource "null_resource" "upload_file" {
+  provisioner "file" {
+    source      = "../bot/config.json"  # Local file path
+    destination = "/home/admin/config.json"  # Destination path on the server
+
+    connection {
+      type        = "ssh"
+      host        = aws_instance.discord-welcome-bot.public_ip
+      user        = "admin"  # Change to your server's user
+      private_key = tls_private_key.tlg_private_key.private_key_pem
+    }
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "echo 'File uploaded successfully!'"
+    ]
+
+    connection {
+      type        = "ssh"
+      host        = aws_instance.discord-welcome-bot.public_ip
+      user        = "admin"  # Change to your server's user
+      private_key = tls_private_key.tlg_private_key.private_key_pem
+    }
+  }
+
+  depends_on = [aws_instance.discord-welcome-bot]
+}
+
+
 # Output the private key
 output "private_key" {
   value     = tls_private_key.tlg_private_key.private_key_pem
@@ -76,17 +106,17 @@ output "key_pair_name" {
   value = aws_key_pair.deployer_key.key_name
 }
 
-# Output the private key to a file
-resource "local_file" "private_key_file" {
-  filename = "${path.module}/private_key.pem"  # Change the path as needed
-  content  = tls_private_key.tlg_private_key.private_key_pem
-  file_permission = "0700"
-}
-
 # Output the public key to a file
 resource "local_file" "public_key_file" {
   filename = "${path.module}/public_key.pub"  # Change the path as needed
   content  = tls_private_key.tlg_private_key.public_key_openssh
+  file_permission = "0700"
+}
+
+# Output the private key to a file
+resource "local_file" "private_key_file" {
+  filename = "${path.module}/private_key.pem"  # Change the path as needed
+  content  = tls_private_key.tlg_private_key.private_key_pem
   file_permission = "0700"
 }
 

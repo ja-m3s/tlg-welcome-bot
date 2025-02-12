@@ -1,2 +1,2 @@
 #!/bin/bash
-ssh -i ./private_key.pem admin@3.8.215.255
+ssh -i ./private_key.pem admin@13.41.108.170
