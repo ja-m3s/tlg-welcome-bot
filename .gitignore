@@ -1,0 +1,8 @@
+config.json
+.terraform
+package-lock.json
+.terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+private_key.pem
+public_key.pub
