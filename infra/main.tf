@@ -18,13 +18,20 @@ resource "aws_key_pair" "deployer_key" {
 }
 
 # Create a security group
-resource "aws_security_group" "allow_ssh" {
-  name        = "allow_ssh"
-  description = "Allow SSH inbound traffic"
+resource "aws_security_group" "allow_ssh_https" {
+  name        = "allow_ssh_https"
+  description = "Allow SSH and HTTPS inbound traffic"
 
   ingress {
     from_port   = 22
     to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Change this to restrict access
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"] # Change this to restrict access
   }
@@ -46,7 +53,7 @@ resource "aws_instance" "discord-welcome-bot" {
   ami             = "ami-0efc5833b9d584374"
   instance_type   = "t2.micro"
   key_name        = aws_key_pair.deployer_key.key_name  # Corrected reference
-  security_groups = [aws_security_group.allow_ssh.name]
+  security_groups = [aws_security_group.allow_ssh_https.name]
   user_data       = file("user-data.sh")  # Corrected syntax
   tags = {
     Name = "discord-welcome-bot"

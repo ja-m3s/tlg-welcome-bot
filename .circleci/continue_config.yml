@@ -1,0 +1,47 @@
+# Name: continue_config.yml
+# Description: Pipeline for circleci, continuing from config.yml
+# builds the image, stores the image
+# Author: ja-m3s
+version: 2.1
+parameters:
+  param-build-bot:
+    type: boolean
+    default: false
+
+executors:
+  build:
+    machine:
+      image: ubuntu-2204:current
+      docker_layer_caching: true
+
+jobs:
+
+  build:
+    executor: build
+    parameters:
+        docker-repo:
+          type: string
+        docker-file-location:
+          type: string
+    steps:
+      - checkout
+      - run:
+          name: 'Build Docker image'
+          command: |
+            docker build -t "<< parameters.docker-repo >>:latest" -f "<< parameters.docker-file-location >>" "bot"
+      - run:
+          name: 'Push to repository'
+          command: |
+            docker login --username ${DOCKER_USER} --password ${DOCKER_PASSWORD}
+            docker push "<< parameters.docker-repo >>:latest"
+
+workflows:
+
+  workflow-build-bot:
+    when: << pipeline.parameters.param-build-bot >>
+    jobs:
+      - build:
+          docker-repo: ${DOCKER_REPO_BOT}
+          docker-file-location: "bot/Dockerfile"
+          context:
+            - org-context-tlg
